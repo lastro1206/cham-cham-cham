@@ -15,10 +15,17 @@
   --font-pixel: var(--font-pixel);
 }
 
+html {
+  overflow: hidden;
+  height: 100%;
+}
+
 body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: linear-gradient(
     180deg,
     var(--space-dark) 0%,
@@ -32,15 +39,23 @@ body {
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
-  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 body::-webkit-scrollbar {
   display: none;
+  width: 0;
+  height: 0;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .emoji-text {

@@ -31,7 +31,7 @@ export default function MainScreen({
   currentStage = 1,
 }: MainScreenProps) {
   return (
-    <div className='main-screen scanline w-full max-w-2xl mx-auto aspect-[4/3] flex items-center justify-center relative overflow-hidden'>
+    <div className='main-screen scanline w-full max-w-6xl mx-auto aspect-[4/3] flex items-center justify-center relative overflow-hidden'>
       <AnimatePresence mode='wait'>
         {state === "idle" && (
           <motion.div

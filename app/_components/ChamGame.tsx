@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import MainScreen from "./MainScreen";
 import PixelButton from "./PixelButton";
 import StarBurst from "./StarBurst";
@@ -107,19 +108,41 @@ export default function ChamGame() {
       />
       <DangerFlash trigger={showDangerFlash} />
 
-      <div className='w-full max-w-4xl flex flex-col items-center gap-4 md:gap-6'>
+      <div className='w-full max-w-7xl flex flex-col items-center gap-4 md:gap-6'>
         <div className='text-xl md:text-2xl text-cyan-400 mb-2'>
           {currentStage <= 3 && `단계 ${currentStage}/3`}
         </div>
 
-        <MainScreen
-          state={gameState}
-          countdownNumber={countdownNumber}
-          cpuDirection={cpuChoice}
-          outcome={outcome}
-          playerChoice={playerChoice}
-          currentStage={currentStage}
-        />
+        <div className='w-full flex items-center justify-center gap-4 md:gap-6'>
+          <div className='hidden md:block relative w-48 h-48 md:w-64 md:h-64 flex-shrink-0'>
+            <Image
+              src='/alomLogo1.png'
+              alt='Alom Logo'
+              fill
+              className='object-contain opacity-80'
+              priority
+            />
+          </div>
+
+          <MainScreen
+            state={gameState}
+            countdownNumber={countdownNumber}
+            cpuDirection={cpuChoice}
+            outcome={outcome}
+            playerChoice={playerChoice}
+            currentStage={currentStage}
+          />
+
+          <div className='hidden md:block relative w-48 h-48 md:w-64 md:h-64 flex-shrink-0'>
+            <Image
+              src='/alomLogo1.png'
+              alt='Alom Logo'
+              fill
+              className='object-contain opacity-80'
+              priority
+            />
+          </div>
+        </div>
 
         <div className='flex flex-col md:flex-row gap-4 md:gap-6 items-center'>
           <PixelButton
