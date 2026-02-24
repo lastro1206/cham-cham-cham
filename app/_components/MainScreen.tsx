@@ -31,12 +31,12 @@ export default function MainScreen({
   currentStage = 1,
 }: MainScreenProps) {
   return (
-    <div className='main-screen scanline w-full max-w-4xl mx-auto aspect-video flex items-center justify-center relative overflow-hidden'>
+    <div className='main-screen scanline w-full max-w-2xl mx-auto aspect-[4/3] flex items-center justify-center relative overflow-hidden'>
       <AnimatePresence mode='wait'>
         {state === "idle" && (
           <motion.div
             key='idle'
-            className='text-3xl md:text-5xl text-cyan-400'
+            className='text-2xl md:text-3xl text-cyan-400'
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}>
@@ -47,7 +47,7 @@ export default function MainScreen({
         {state === "countdown" && countdownNumber !== undefined && (
           <motion.div
             key={`countdown-${countdownNumber}`}
-            className='number-text text-8xl md:text-[200px] text-yellow-400 font-bold'
+            className='number-text text-6xl md:text-[120px] text-yellow-400 font-bold'
             initial={{ opacity: 0, scale: 0.3 }}
             animate={{
               opacity: [0, 1, 1, 0],
@@ -68,7 +68,7 @@ export default function MainScreen({
         {state === "reveal" && cpuDirection && (
           <motion.div
             key='reveal'
-            className='emoji-text text-9xl md:text-[200px] text-cyan-400'
+            className='emoji-text text-7xl md:text-[140px] text-cyan-400'
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
@@ -91,7 +91,7 @@ export default function MainScreen({
             exit={{ opacity: 0 }}>
             {outcome === "win" ? (
               <motion.div
-                className='text-5xl md:text-7xl text-green-400 font-bold'
+                className='text-4xl md:text-5xl text-green-400 font-bold'
                 initial={{ scale: 0 }}
                 animate={{ scale: [0, 1.2, 1] }}
                 transition={{ duration: 0.5 }}
@@ -108,7 +108,7 @@ export default function MainScreen({
                   show={true}
                 />
                 <motion.div
-                  className='text-4xl md:text-6xl text-red-600 font-bold'
+                  className='text-3xl md:text-4xl text-red-600 font-bold'
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   style={{
@@ -130,7 +130,7 @@ export default function MainScreen({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}>
             <motion.div
-              className='text-5xl md:text-7xl text-green-400 font-bold'
+              className='text-4xl md:text-5xl text-green-400 font-bold'
               initial={{ scale: 0 }}
               animate={{ scale: [0, 1.2, 1] }}
               transition={{ duration: 0.5 }}
@@ -141,7 +141,7 @@ export default function MainScreen({
               SUCCESS!
             </motion.div>
             <motion.div
-              className='text-2xl md:text-4xl text-cyan-400'
+              className='text-xl md:text-2xl text-cyan-400'
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
@@ -161,7 +161,7 @@ export default function MainScreen({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}>
             <motion.div
-              className='text-6xl md:text-8xl text-yellow-400 font-bold'
+              className='text-5xl md:text-6xl text-yellow-400 font-bold'
               initial={{ scale: 0, rotate: -180 }}
               animate={{
                 scale: [0, 1.3, 1],
@@ -175,7 +175,7 @@ export default function MainScreen({
               PERFECT!
             </motion.div>
             <motion.div
-              className='text-3xl md:text-5xl text-green-400 font-bold'
+              className='text-2xl md:text-3xl text-green-400 font-bold'
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}

@@ -107,8 +107,8 @@ export default function ChamGame() {
       />
       <DangerFlash trigger={showDangerFlash} />
 
-      <div className='w-full max-w-6xl flex flex-col items-center gap-8 md:gap-12'>
-        <div className='text-2xl md:text-3xl text-cyan-400 mb-4'>
+      <div className='w-full max-w-4xl flex flex-col items-center gap-4 md:gap-6'>
+        <div className='text-xl md:text-2xl text-cyan-400 mb-2'>
           {currentStage <= 3 && `단계 ${currentStage}/3`}
         </div>
 
@@ -121,7 +121,7 @@ export default function ChamGame() {
           currentStage={currentStage}
         />
 
-        <div className='flex flex-col md:flex-row gap-6 md:gap-8 items-center'>
+        <div className='flex flex-col md:flex-row gap-4 md:gap-6 items-center'>
           <PixelButton
             direction='left'
             onClick={() => handleSelect("left")}
@@ -136,7 +136,7 @@ export default function ChamGame() {
 
         {(gameState === "result" || gameState === "gameComplete") && (
           <motion.button
-            className='pixel-button text-xl md:text-2xl px-6 md:px-8 py-4 md:py-6'
+            className='pixel-button text-lg md:text-xl px-5 md:px-6 py-3 md:py-4'
             onClick={handleReset}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -147,7 +147,7 @@ export default function ChamGame() {
 
         {gameState === "stageComplete" && (
           <motion.button
-            className='pixel-button text-xl md:text-2xl px-6 md:px-8 py-4 md:py-6'
+            className='pixel-button text-lg md:text-xl px-5 md:px-6 py-3 md:py-4'
             onClick={handleNextStage}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

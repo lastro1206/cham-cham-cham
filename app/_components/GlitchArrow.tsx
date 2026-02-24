@@ -14,11 +14,12 @@ export default function GlitchArrow({ direction, show }: GlitchArrowProps) {
 
   return (
     <motion.div
-      className="emoji-text text-red-600 text-9xl md:text-[200px] font-bold relative"
+      className='emoji-text text-red-600 text-7xl md:text-[140px] font-bold relative'
       style={{
         filter: "drop-shadow(0 0 20px #ff0000)",
-        fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", sans-serif',
-        lineHeight: 1
+        fontFamily:
+          '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", sans-serif',
+        lineHeight: 1,
       }}
       animate={{
         x: [0, -5, 5, -5, 5, 0],
@@ -28,12 +29,11 @@ export default function GlitchArrow({ direction, show }: GlitchArrowProps) {
         duration: 0.3,
         repeat: Infinity,
         repeatType: "reverse",
-      }}
-    >
-      <div className="relative">
+      }}>
+      <div className='relative'>
         {arrow}
         <motion.div
-          className="absolute inset-0 bg-red-600 opacity-20"
+          className='absolute inset-0 bg-red-600 opacity-20'
           style={{
             clipPath: "polygon(0 0, 50% 0, 50% 100%, 0 100%)",
           }}
@@ -46,7 +46,7 @@ export default function GlitchArrow({ direction, show }: GlitchArrowProps) {
           }}
         />
         <motion.div
-          className="absolute inset-0 bg-red-600 opacity-20"
+          className='absolute inset-0 bg-red-600 opacity-20'
           style={{
             clipPath: "polygon(50% 0, 100% 0, 100% 100%, 50% 100%)",
           }}
@@ -63,4 +63,3 @@ export default function GlitchArrow({ direction, show }: GlitchArrowProps) {
     </motion.div>
   );
 }
-
