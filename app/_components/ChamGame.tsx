@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { useSound } from "../_hooks/useSound";
 import MainScreen from "./MainScreen";
 import PixelButton from "./PixelButton";
@@ -23,6 +22,7 @@ export default function ChamGame() {
   const { playSound } = useSound({ volume: 0.5 });
   const [gameState, setGameState] = useState<GameState>("idle");
   const [currentStage, setCurrentStage] = useState<number>(1);
+  const [winStreak, setWinStreak] = useState<number>(0);
   const [countdownNumber, setCountdownNumber] = useState<number | undefined>(
     undefined
   );
@@ -66,6 +66,7 @@ export default function ChamGame() {
             const isWin = playerChoice !== cpuDirection;
             setOutcome(isWin ? "win" : "lose");
             if (isWin) {
+              setWinStreak((prev) => prev + 1);
               if (currentStage >= 3) {
                 setGameState("gameComplete");
               } else {
@@ -84,6 +85,7 @@ export default function ChamGame() {
   const handleReset = useCallback(() => {
     setGameState("idle");
     setCurrentStage(1);
+    setWinStreak(0);
     setCountdownNumber(undefined);
     setPlayerChoice(undefined);
     setCpuChoice(undefined);
@@ -134,7 +136,11 @@ export default function ChamGame() {
   const showDangerFlash = gameState === "result" && outcome === "lose";
 
   const particleCount =
-    gameState === "gameComplete" ? 80 : gameState === "stageComplete" ? 50 : 30;
+    gameState === "gameComplete"
+      ? 150
+      : gameState === "stageComplete"
+      ? 100
+      : 60;
 
   return (
     <div className='h-screen flex flex-col items-center justify-center p-2 md:p-4 relative z-10'>
@@ -145,9 +151,26 @@ export default function ChamGame() {
       <DangerFlash trigger={showDangerFlash} />
 
       <div className='w-full max-w-5xl flex flex-col items-center gap-2 md:gap-3'>
-        <div className='text-sm md:text-base text-cyan-400 mb-1'>
-          {currentStage <= 3 && `라운드 ${currentStage}/3`}
-        </div>
+        <motion.div
+          className='text-lg md:text-2xl text-cyan-400 mb-2 font-bold'
+          animate={{
+            textShadow: [
+              "0 0 10px #00ffff",
+              "0 0 20px #00ffff, 0 0 30px #00ffff",
+              "0 0 10px #00ffff",
+            ],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          style={{
+            fontFamily: "var(--font-pixel), monospace",
+            letterSpacing: "0.1em",
+          }}>
+          {currentStage <= 3 && `🎯 ROUND ${currentStage}/3 🎯`}
+        </motion.div>
 
         <div className='w-full flex items-center justify-center gap-4 md:gap-6'>
           {/* <div className='hidden md:block relative w-32 h-32 md:w-48 md:h-48 flex-shrink-0'>
@@ -167,6 +190,7 @@ export default function ChamGame() {
             outcome={outcome}
             playerChoice={playerChoice}
             currentStage={currentStage}
+            winStreak={winStreak}
           />
 
           {/* <div className='hidden md:block relative w-32 h-32 md:w-48 md:h-48 flex-shrink-0'>
@@ -195,23 +219,41 @@ export default function ChamGame() {
 
         {(gameState === "result" || gameState === "gameComplete") && (
           <motion.button
-            className='pixel-button text-sm md:text-base px-3 md:px-4 py-2 md:py-3'
+            className='pixel-button text-lg md:text-xl px-6 md:px-8 py-4 md:py-5 font-bold'
             onClick={handleReset}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 20, scale: 0.8 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              boxShadow: "0 0 30px #00ffff, 0 0 60px #00ffff",
+            }}
+            whileHover={{
+              scale: 1.1,
+              boxShadow: "0 0 40px #00ffff, 0 0 80px #00ffff",
+            }}
             transition={{ delay: gameState === "result" ? 0.5 : 2 }}>
-            다시하기
+            🔄 다시하기
           </motion.button>
         )}
 
         {gameState === "stageComplete" && (
           <motion.button
-            className='pixel-button text-sm md:text-base px-3 md:px-4 py-2 md:py-3'
+            className='pixel-button text-lg md:text-xl px-6 md:px-8 py-4 md:py-5 font-bold'
             onClick={handleNextStage}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 20, scale: 0.8 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              boxShadow: "0 0 30px #00ff00, 0 0 60px #00ff00",
+            }}
+            whileHover={{
+              scale: 1.1,
+              boxShadow: "0 0 40px #00ff00, 0 0 80px #00ff00",
+            }}
             transition={{ delay: 1 }}>
-            다음 라운드
+            ⏭️ 다음 라운드
           </motion.button>
         )}
       </div>
