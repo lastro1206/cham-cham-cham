@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useSound } from "../_hooks/useSound";
 import MainScreen from "./MainScreen";
 import PixelButton from "./PixelButton";
 import StarBurst from "./StarBurst";
@@ -19,6 +20,7 @@ type Direction = "left" | "right";
 type Outcome = "win" | "lose";
 
 export default function ChamGame() {
+  const { playSound } = useSound({ volume: 0.5 });
   const [gameState, setGameState] = useState<GameState>("idle");
   const [currentStage, setCurrentStage] = useState<number>(1);
   const [countdownNumber, setCountdownNumber] = useState<number | undefined>(
@@ -44,6 +46,7 @@ export default function ChamGame() {
   useEffect(() => {
     if (gameState === "countdown" && countdownNumber !== undefined) {
       if (countdownNumber > 0) {
+        playSound(`countdown-${countdownNumber}` as "countdown-3" | "countdown-2" | "countdown-1");
         const timer = setTimeout(() => {
           setCountdownNumber(countdownNumber - 1);
         }, 800);
@@ -71,7 +74,7 @@ export default function ChamGame() {
         return () => clearTimeout(timer);
       }
     }
-  }, [gameState, countdownNumber, playerChoice, currentStage]);
+  }, [gameState, countdownNumber, playerChoice, currentStage, playSound]);
 
   const handleReset = useCallback(() => {
     setGameState("idle");
@@ -90,6 +93,34 @@ export default function ChamGame() {
     setCpuChoice(undefined);
     setOutcome(undefined);
   }, []);
+
+  useEffect(() => {
+    if (gameState === "reveal") {
+      playSound("reveal");
+    }
+  }, [gameState, playSound]);
+
+  useEffect(() => {
+    if (gameState === "result" && outcome) {
+      if (outcome === "win") {
+        playSound("success");
+      } else {
+        playSound("fail");
+      }
+    }
+  }, [gameState, outcome, playSound]);
+
+  useEffect(() => {
+    if (gameState === "stageComplete") {
+      playSound("stage-complete");
+    }
+  }, [gameState, playSound]);
+
+  useEffect(() => {
+    if (gameState === "gameComplete") {
+      playSound("game-complete");
+    }
+  }, [gameState, playSound]);
 
   const showStarBurst =
     (gameState === "result" && outcome === "win") ||
