@@ -17,7 +17,7 @@ export default function PixelButton({
 
   return (
     <motion.button
-      className='pixel-button text-xl md:text-2xl px-6 md:px-8 py-4 md:py-6 min-w-[160px] md:min-w-[200px]'
+      className='pixel-button text-sm md:text-base px-4 md:px-5 py-2 md:py-3 min-w-[120px] md:min-w-[140px]'
       onClick={onClick}
       disabled={disabled}
       whileHover={!disabled ? { scale: 1.05 } : {}}

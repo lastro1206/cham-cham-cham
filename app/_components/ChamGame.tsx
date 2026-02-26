@@ -46,7 +46,12 @@ export default function ChamGame() {
   useEffect(() => {
     if (gameState === "countdown" && countdownNumber !== undefined) {
       if (countdownNumber > 0) {
-        playSound(`countdown-${countdownNumber}` as "countdown-3" | "countdown-2" | "countdown-1");
+        playSound(
+          `countdown-${countdownNumber}` as
+            | "countdown-3"
+            | "countdown-2"
+            | "countdown-1"
+        );
         const timer = setTimeout(() => {
           setCountdownNumber(countdownNumber - 1);
         }, 800);
@@ -69,7 +74,7 @@ export default function ChamGame() {
             } else {
               setGameState("result");
             }
-          }, 500);
+          }, 2000);
         }, 0);
         return () => clearTimeout(timer);
       }
@@ -132,28 +137,28 @@ export default function ChamGame() {
     gameState === "gameComplete" ? 80 : gameState === "stageComplete" ? 50 : 30;
 
   return (
-    <div className='min-h-screen flex flex-col items-center justify-center p-4 md:p-8 relative z-10'>
+    <div className='h-screen flex flex-col items-center justify-center p-2 md:p-4 relative z-10'>
       <StarBurst
         trigger={showStarBurst}
         particleCount={particleCount}
       />
       <DangerFlash trigger={showDangerFlash} />
 
-      <div className='w-full max-w-7xl flex flex-col items-center gap-4 md:gap-6'>
-        <div className='text-xl md:text-2xl text-cyan-400 mb-2'>
-          {currentStage <= 3 && `단계 ${currentStage}/3`}
+      <div className='w-full max-w-5xl flex flex-col items-center gap-2 md:gap-3'>
+        <div className='text-sm md:text-base text-cyan-400 mb-1'>
+          {currentStage <= 3 && `라운드 ${currentStage}/3`}
         </div>
 
         <div className='w-full flex items-center justify-center gap-4 md:gap-6'>
-          <div className='hidden md:block relative w-48 h-48 md:w-64 md:h-64 flex-shrink-0'>
+          {/* <div className='hidden md:block relative w-32 h-32 md:w-48 md:h-48 flex-shrink-0'>
             <Image
-              src='/alomLogo1.png'
-              alt='Alom Logo'
+              src='/alomi.png'
+              alt='Alomi Logo'
               fill
               className='object-contain opacity-80'
               priority
             />
-          </div>
+          </div> */}
 
           <MainScreen
             state={gameState}
@@ -164,18 +169,18 @@ export default function ChamGame() {
             currentStage={currentStage}
           />
 
-          <div className='hidden md:block relative w-48 h-48 md:w-64 md:h-64 flex-shrink-0'>
+          {/* <div className='hidden md:block relative w-32 h-32 md:w-48 md:h-48 flex-shrink-0'>
             <Image
-              src='/alomLogo1.png'
-              alt='Alom Logo'
+              src='/daromi.png'
+              alt='Daromi Logo'
               fill
               className='object-contain opacity-80'
               priority
             />
-          </div>
+          </div> */}
         </div>
 
-        <div className='flex flex-col md:flex-row gap-4 md:gap-6 items-center'>
+        <div className='flex flex-col md:flex-row gap-2 md:gap-3 items-center'>
           <PixelButton
             direction='left'
             onClick={() => handleSelect("left")}
@@ -190,7 +195,7 @@ export default function ChamGame() {
 
         {(gameState === "result" || gameState === "gameComplete") && (
           <motion.button
-            className='pixel-button text-lg md:text-xl px-5 md:px-6 py-3 md:py-4'
+            className='pixel-button text-sm md:text-base px-3 md:px-4 py-2 md:py-3'
             onClick={handleReset}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -201,12 +206,12 @@ export default function ChamGame() {
 
         {gameState === "stageComplete" && (
           <motion.button
-            className='pixel-button text-lg md:text-xl px-5 md:px-6 py-3 md:py-4'
+            className='pixel-button text-sm md:text-base px-3 md:px-4 py-2 md:py-3'
             onClick={handleNextStage}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1 }}>
-            다음 단계
+            다음 라운드
           </motion.button>
         )}
       </div>

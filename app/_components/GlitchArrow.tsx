@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 interface GlitchArrowProps {
   direction: "left" | "right";
@@ -10,16 +11,15 @@ interface GlitchArrowProps {
 export default function GlitchArrow({ direction, show }: GlitchArrowProps) {
   if (!show) return null;
 
-  const arrow = direction === "left" ? "⬅️" : "➡️";
-
   return (
     <motion.div
-      className='emoji-text text-red-600 text-7xl md:text-[140px] font-bold relative'
+      className={`relative flex items-center justify-center ${
+        direction === "left"
+          ? "w-20 h-20 md:w-32 md:h-32"
+          : "w-40 h-40 md:w-64 md:h-64"
+      }`}
       style={{
         filter: "drop-shadow(0 0 20px #ff0000)",
-        fontFamily:
-          '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", sans-serif',
-        lineHeight: 1,
       }}
       animate={{
         x: [0, -5, 5, -5, 5, 0],
@@ -30,35 +30,27 @@ export default function GlitchArrow({ direction, show }: GlitchArrowProps) {
         repeat: Infinity,
         repeatType: "reverse",
       }}>
-      <div className='relative'>
-        {arrow}
-        <motion.div
-          className='absolute inset-0 bg-red-600 opacity-20'
-          style={{
-            clipPath: "polygon(0 0, 50% 0, 50% 100%, 0 100%)",
-          }}
-          animate={{
-            x: [0, 10, -10, 10, 0],
-          }}
-          transition={{
-            duration: 0.1,
-            repeat: Infinity,
-          }}
-        />
-        <motion.div
-          className='absolute inset-0 bg-red-600 opacity-20'
-          style={{
-            clipPath: "polygon(50% 0, 100% 0, 100% 100%, 50% 100%)",
-          }}
-          animate={{
-            x: [0, -10, 10, -10, 0],
-          }}
-          transition={{
-            duration: 0.1,
-            repeat: Infinity,
-            delay: 0.05,
-          }}
-        />
+      <div className='relative w-full h-full'>
+        {direction === "left" ? (
+          <span
+            className='emoji-text text-red-600 text-5xl md:text-7xl font-bold block'
+            style={{
+              fontFamily:
+                '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", sans-serif',
+              lineHeight: 1,
+            }}>
+            ⬅️
+          </span>
+        ) : (
+          <Image
+            src='/right.png'
+            alt='Right Arrow'
+            width={192}
+            height={192}
+            className='w-full h-full object-contain'
+            priority
+          />
+        )}
       </div>
     </motion.div>
   );
