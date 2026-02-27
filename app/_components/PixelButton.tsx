@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { FaRegHandPointLeft, FaRegHandPointRight } from "react-icons/fa";
 
 interface PixelButtonProps {
   direction: "left" | "right";
@@ -13,11 +14,12 @@ export default function PixelButton({
   onClick,
   disabled = false,
 }: PixelButtonProps) {
-  const label = direction === "left" ? "⬅️ 좌" : "우 ➡️";
+  const Icon = direction === "left" ? FaRegHandPointLeft : FaRegHandPointRight;
+  const label = direction === "left" ? "좌" : "우";
 
   return (
     <motion.button
-      className='pixel-button text-lg md:text-2xl px-6 md:px-8 py-4 md:py-5 min-w-[160px] md:min-w-[200px] font-bold'
+      className='pixel-button text-lg md:text-2xl px-6 md:px-8 py-4 md:py-5 min-w-[160px] md:min-w-[200px] font-bold flex items-center justify-center rounded-xl'
       onClick={onClick}
       disabled={disabled}
       whileHover={
@@ -39,11 +41,22 @@ export default function PixelButton({
       }}
       transition={{ duration: 0.3 }}
       style={{
-        fontFamily:
-          'var(--font-pixel), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", monospace',
+        fontFamily: "var(--font-pixel), monospace",
         textShadow: "0 0 10px rgba(0, 255, 255, 0.8)",
       }}>
-      {label}
+      <span className='flex items-center justify-center gap-2'>
+        {direction === "left" ? (
+          <>
+            <Icon className='text-xl md:text-2xl' />
+            <span>{label}</span>
+          </>
+        ) : (
+          <>
+            <span>{label}</span>
+            <Icon className='text-xl md:text-2xl' />
+          </>
+        )}
+      </span>
     </motion.button>
   );
 }

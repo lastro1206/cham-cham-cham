@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
+import { FaRedo } from "react-icons/fa";
+import { MdKeyboardDoubleArrowRight } from "react-icons/md";
 import { useSound } from "../_hooks/useSound";
 import MainScreen from "./MainScreen";
 import PixelButton from "./PixelButton";
@@ -172,13 +175,14 @@ export default function ChamGame() {
           {currentStage <= 3 && `🎯 ROUND ${currentStage}/3 🎯`}
         </motion.div>
 
-        <div className='w-full flex items-center justify-center gap-4 md:gap-6'>
-          {/* <div className='hidden md:block relative w-32 h-32 md:w-48 md:h-48 flex-shrink-0'>
+        <div className='w-full flex items-center justify-center gap-4 md:gap-6 relative'>
+          {/* Left Daromi - slightly off-center, casual placement */}
+          {/* <div className='hidden md:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-8 w-48 h-48 opacity-75 rotate-[-12deg] z-0 pointer-events-none'>
             <Image
-              src='/alomi.png'
-              alt='Alomi Logo'
+              src='/daromi.png'
+              alt='Daromi Left'
               fill
-              className='object-contain opacity-80'
+              className='object-contain drop-shadow-[0_0_20px_rgba(0,255,255,0.4)]'
               priority
             />
           </div> */}
@@ -193,12 +197,13 @@ export default function ChamGame() {
             winStreak={winStreak}
           />
 
-          {/* <div className='hidden md:block relative w-32 h-32 md:w-48 md:h-48 flex-shrink-0'>
+          {/* Right Daromi - slightly off-center, casual placement */}
+          {/* <div className='hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-8 w-48 h-48 opacity-75 rotate-12 z-0 pointer-events-none'>
             <Image
               src='/daromi.png'
-              alt='Daromi Logo'
+              alt='Daromi Right'
               fill
-              className='object-contain opacity-80'
+              className='object-contain drop-shadow-[0_0_20px_rgba(0,255,255,0.4)]'
               priority
             />
           </div> */}
@@ -219,7 +224,7 @@ export default function ChamGame() {
 
         {(gameState === "result" || gameState === "gameComplete") && (
           <motion.button
-            className='pixel-button text-lg md:text-xl px-6 md:px-8 py-4 md:py-5 font-bold'
+            className='pixel-button text-base md:text-lg px-5 md:px-6 py-3 md:py-4 font-bold flex items-center justify-center gap-2 rounded-lg'
             onClick={handleReset}
             initial={{ opacity: 0, y: 20, scale: 0.8 }}
             animate={{
@@ -233,13 +238,14 @@ export default function ChamGame() {
               boxShadow: "0 0 40px #00ffff, 0 0 80px #00ffff",
             }}
             transition={{ delay: gameState === "result" ? 0.5 : 2 }}>
-            🔄 다시하기
+            <FaRedo className='text-xl md:text-2xl' />
+            <span>RESTART</span>
           </motion.button>
         )}
 
         {gameState === "stageComplete" && (
           <motion.button
-            className='pixel-button text-lg md:text-xl px-6 md:px-8 py-4 md:py-5 font-bold'
+            className='pixel-button text-lg md:text-xl px-6 md:px-8 py-4 md:py-5 font-bold flex items-center justify-center gap-2 rounded-2xl'
             onClick={handleNextStage}
             initial={{ opacity: 0, y: 20, scale: 0.8 }}
             animate={{
@@ -253,7 +259,8 @@ export default function ChamGame() {
               boxShadow: "0 0 40px #00ff00, 0 0 80px #00ff00",
             }}
             transition={{ delay: 1 }}>
-            ⏭️ 다음 라운드
+            <span>NEXT ROUND</span>
+            <MdKeyboardDoubleArrowRight className='text-2xl md:text-3xl' />
           </motion.button>
         )}
       </div>

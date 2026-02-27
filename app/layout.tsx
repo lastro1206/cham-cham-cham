@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 
 const pixelFont = localFont({
-  src: "../public/fonts/GalmuriMono9.ttf",
+  src: "../public/fonts/DNFBitBitv2.ttf",
   variable: "--font-pixel",
   display: "swap",
 });

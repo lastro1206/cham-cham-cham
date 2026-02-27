@@ -64,27 +64,6 @@ export default function MainScreen({
           </motion.div>
         </motion.div>
       )}
-      {/* Left Logo */}
-      {/* <div className='absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-32 h-32 md:w-48 md:h-48 opacity-60 z-0'>
-        <Image
-          src='/alomi.png'
-          alt='Alomi Logo'
-          fill
-          className='object-contain'
-          priority
-        />
-      </div> */}
-
-      {/* Right Logo */}
-      {/* <div className='absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-32 h-32 md:w-48 md:h-48 opacity-60 z-0'>
-        <Image
-          src='/daromi.png'
-          alt='Daromi Logo'
-          fill
-          className='object-contain'
-          priority
-        />
-      </div> */}
 
       <AnimatePresence mode='wait'>
         {state === "idle" && (
@@ -99,7 +78,7 @@ export default function MainScreen({
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.5 }}>
             <motion.div
-              className='relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center'
+              className='relative w-64 h-64 md:w-96 md:h-96 flex items-center justify-center'
               animate={{
                 scale: [1, 1.05, 1],
               }}
@@ -109,7 +88,7 @@ export default function MainScreen({
                 ease: "easeInOut",
               }}>
               <Image
-                src='/jungmeon.png'
+                src='/jeongmeon.png'
                 alt='Jungmeon Character'
                 fill
                 className='object-contain'
@@ -117,7 +96,7 @@ export default function MainScreen({
               />
             </motion.div>
             <motion.div
-              className='text-xl md:text-3xl text-cyan-400 font-bold'
+              className='text-2xl md:text-4xl text-white font-bold'
               animate={{
                 opacity: [0.7, 1, 0.7],
                 scale: [1, 1.05, 1],
@@ -128,11 +107,11 @@ export default function MainScreen({
                 ease: "easeInOut",
               }}
               style={{
-                textShadow: "0 0 20px #00ffff, 0 0 40px #00ffff",
+                textShadow: "0 0 20px #ffffff, 0 0 40px #ffffff",
                 fontFamily: "var(--font-pixel), monospace",
                 letterSpacing: "0.1em",
               }}>
-              🎮 방향을 선택하세요! 🎮
+              방향을 선택하세요!
             </motion.div>
           </motion.div>
         )}
@@ -269,7 +248,7 @@ export default function MainScreen({
               style={{
                 fontFamily: "var(--font-pixel), monospace",
               }}>
-              {currentStage}ROUND 완료!
+              {currentStage}ROUND 성공!
             </motion.div>
           </motion.div>
         )}
