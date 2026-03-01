@@ -42,7 +42,7 @@ export default function PixelButton({
       transition={{ duration: 0.3 }}
       style={{
         fontFamily: "var(--font-pixel), monospace",
-        textShadow: "0 0 10px rgba(0, 255, 255, 0.8)",
+        textShadow: "0 0 5px rgba(0, 255, 255, 0.8)",
       }}>
       <span className='flex items-center justify-center gap-2'>
         {direction === "left" ? (
