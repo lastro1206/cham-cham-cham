@@ -158,9 +158,9 @@ export default function ChamGame() {
           className='text-lg md:text-2xl text-cyan-400 mb-2 font-bold'
           animate={{
             textShadow: [
-              "0 0 10px #00ffff",
-              "0 0 20px #00ffff, 0 0 30px #00ffff",
-              "0 0 10px #00ffff",
+              "0 0 5px #00ffff",
+              "0 0 10px #00ffff, 0 0 15px #00ffff",
+              "0 0 5px #00ffff",
             ],
           }}
           transition={{

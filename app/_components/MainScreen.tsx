@@ -46,9 +46,9 @@ export default function MainScreen({
             className='text-lg md:text-2xl text-yellow-400 font-bold px-4 py-2'
             animate={{
               textShadow: [
-                "0 0 10px #ffaa00",
-                "0 0 20px #ffaa00, 0 0 30px #ffaa00",
-                "0 0 10px #ffaa00",
+                "0 0 5px #ffaa00",
+                "0 0 10px #ffaa00, 0 0 15px #ffaa00",
+                "0 0 5px #ffaa00",
               ],
             }}
             transition={{
@@ -107,7 +107,7 @@ export default function MainScreen({
                 ease: "easeInOut",
               }}
               style={{
-                textShadow: "0 0 20px #ffffff, 0 0 40px #ffffff",
+                textShadow: "0 0 10px #ffffff, 0 0 20px #ffffff",
                 fontFamily: "var(--font-pixel), monospace",
                 letterSpacing: "0.1em",
               }}>
@@ -133,7 +133,7 @@ export default function MainScreen({
             }}
             style={{
               fontFamily: 'var(--font-pixel), "Courier New", monospace',
-              textShadow: "0 0 30px #ffaa00, 0 0 60px #ffaa00",
+              textShadow: "0 0 15px #ffaa00, 0 0 30px #ffaa00",
             }}>
             참
           </motion.div>
@@ -192,7 +192,7 @@ export default function MainScreen({
                 style={{
                   fontFamily: "var(--font-pixel), monospace",
                   letterSpacing: "0.1em",
-                  textShadow: "0 0 30px #00ff00, 0 0 60px #00ff00",
+                  textShadow: "0 0 15px #00ff00, 0 0 30px #00ff00",
                 }}>
                 ✨ SUCCESS! ✨
               </motion.div>
@@ -209,7 +209,7 @@ export default function MainScreen({
                   style={{
                     fontFamily: "var(--font-pixel), monospace",
                     letterSpacing: "0.1em",
-                    textShadow: "0 0 30px #ff0000, 0 0 60px #ff0000",
+                    textShadow: "0 0 15px #ff0000, 0 0 30px #ff0000",
                   }}>
                   LOSE
                 </motion.div>
@@ -236,7 +236,7 @@ export default function MainScreen({
               style={{
                 fontFamily: "var(--font-pixel), monospace",
                 letterSpacing: "0.1em",
-                textShadow: "0 0 30px #00ff00, 0 0 60px #00ff00",
+                textShadow: "0 0 15px #00ff00, 0 0 30px #00ff00",
               }}>
               ✨ SUCCESS! ✨
             </motion.div>
@@ -271,7 +271,7 @@ export default function MainScreen({
               style={{
                 fontFamily: "var(--font-pixel), monospace",
                 letterSpacing: "0.1em",
-                textShadow: "0 0 40px #ffaa00, 0 0 80px #ffaa00",
+                textShadow: "0 0 20px #ffaa00, 0 0 40px #ffaa00",
               }}>
               🎉 PERFECT! 🎉
             </motion.div>
