@@ -2,16 +2,17 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
-import { FaRedo } from "react-icons/fa";
+import { FaRedo, FaPlay } from "react-icons/fa";
 import { MdKeyboardDoubleArrowRight } from "react-icons/md";
 import { useSound } from "../_hooks/useSound";
 import MainScreen from "./MainScreen";
 import PixelButton from "./PixelButton";
 import StarBurst from "./StarBurst";
 import DangerFlash from "./DangerFlash";
+import MediaPipeFaceController from "./MediaPipeFaceController";
 
 type GameState =
+  | "waiting"
   | "idle"
   | "countdown"
   | "reveal"
@@ -23,7 +24,7 @@ type Outcome = "win" | "lose";
 
 export default function ChamGame() {
   const { playSound } = useSound({ volume: 0.5 });
-  const [gameState, setGameState] = useState<GameState>("idle");
+  const [gameState, setGameState] = useState<GameState>("waiting");
   const [currentStage, setCurrentStage] = useState<number>(1);
   const [winStreak, setWinStreak] = useState<number>(0);
   const [countdownNumber, setCountdownNumber] = useState<number | undefined>(
@@ -34,6 +35,7 @@ export default function ChamGame() {
   );
   const [cpuChoice, setCpuChoice] = useState<Direction | undefined>(undefined);
   const [outcome, setOutcome] = useState<Outcome | undefined>(undefined);
+  const [faceDetectionEnabled, setFaceDetectionEnabled] = useState(false);
 
   const handleSelect = useCallback(
     (direction: Direction) => {
@@ -44,6 +46,14 @@ export default function ChamGame() {
       setCountdownNumber(3);
     },
     [gameState]
+  );
+
+  const handleFaceDirection = useCallback(
+    (direction: Direction) => {
+      if (gameState !== "idle" || !faceDetectionEnabled) return;
+      handleSelect(direction);
+    },
+    [gameState, faceDetectionEnabled, handleSelect]
   );
 
   useEffect(() => {
@@ -85,8 +95,12 @@ export default function ChamGame() {
     }
   }, [gameState, countdownNumber, playerChoice, currentStage, playSound]);
 
-  const handleReset = useCallback(() => {
+  const handleStart = useCallback(() => {
     setGameState("idle");
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setGameState("waiting");
     setCurrentStage(1);
     setWinStreak(0);
     setCountdownNumber(undefined);
@@ -147,6 +161,10 @@ export default function ChamGame() {
 
   return (
     <div className='h-screen flex flex-col items-center justify-center p-2 md:p-4 relative z-10'>
+      <MediaPipeFaceController
+        onDirectionDetected={handleFaceDirection}
+        enabled={faceDetectionEnabled && gameState === "idle"}
+      />
       <StarBurst
         trigger={showStarBurst}
         particleCount={particleCount}
@@ -158,9 +176,9 @@ export default function ChamGame() {
           className='text-lg md:text-2xl text-cyan-400 mb-2 font-bold'
           animate={{
             textShadow: [
-              "0 0 10px #00ffff",
-              "0 0 20px #00ffff, 0 0 30px #00ffff",
-              "0 0 10px #00ffff",
+              "0 0 5px #00ffff",
+              "0 0 10px #00ffff, 0 0 15px #00ffff",
+              "0 0 5px #00ffff",
             ],
           }}
           transition={{
@@ -209,18 +227,61 @@ export default function ChamGame() {
           </div> */}
         </div>
 
-        <div className='flex flex-col md:flex-row gap-2 md:gap-3 items-center'>
-          <PixelButton
-            direction='left'
-            onClick={() => handleSelect("left")}
-            disabled={gameState !== "idle"}
-          />
-          <PixelButton
-            direction='right'
-            onClick={() => handleSelect("right")}
-            disabled={gameState !== "idle"}
-          />
-        </div>
+        {gameState === "waiting" && (
+          <motion.button
+            className='pixel-button text-xl md:text-2xl px-8 md:px-10 py-5 md:py-6 font-bold flex items-center justify-center gap-3 rounded-xl border-cyan-500 bg-cyan-900/30 text-cyan-400'
+            onClick={handleStart}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              boxShadow: "0 0 30px #00ffff, 0 0 60px #00ffff",
+            }}
+            whileHover={{
+              scale: 1.1,
+              boxShadow: "0 0 40px #00ffff, 0 0 80px #00ffff",
+            }}
+            transition={{ duration: 0.3 }}>
+            <FaPlay className='text-2xl md:text-3xl' />
+            <span>START</span>
+          </motion.button>
+        )}
+
+        {gameState !== "waiting" && (
+          <div className='flex flex-col items-center gap-3'>
+            <div className='flex flex-col md:flex-row gap-2 md:gap-3 items-center'>
+              <PixelButton
+                direction='left'
+                onClick={() => handleSelect("left")}
+                disabled={gameState !== "idle"}
+              />
+              <PixelButton
+                direction='right'
+                onClick={() => handleSelect("right")}
+                disabled={gameState !== "idle"}
+              />
+            </div>
+            {gameState === "idle" && (
+              <motion.button
+                className='pixel-button text-sm md:text-base px-4 md:px-5 py-2 md:py-3 font-bold flex items-center justify-center gap-2 rounded-md'
+                onClick={() => setFaceDetectionEnabled(!faceDetectionEnabled)}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                style={{
+                  boxShadow: faceDetectionEnabled
+                    ? "0 0 20px #00ff00, 0 0 40px #00ff00"
+                    : "0 0 10px rgba(0, 255, 255, 0.5)",
+                }}
+                whileHover={{
+                  scale: 1.05,
+                }}>
+                <span>
+                  {faceDetectionEnabled ? "얼굴 감지 OFF" : "얼굴 감지 ON"}
+                </span>
+              </motion.button>
+            )}
+          </div>
+        )}
 
         {(gameState === "result" || gameState === "gameComplete") && (
           <motion.button
