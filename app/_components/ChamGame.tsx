@@ -2,17 +2,18 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { FaRedo, FaPlay } from "react-icons/fa";
+import { FaRedo } from "react-icons/fa";
 import { MdKeyboardDoubleArrowRight } from "react-icons/md";
 import { useSound } from "../_hooks/useSound";
 import MainScreen from "./MainScreen";
 import PixelButton from "./PixelButton";
 import StarBurst from "./StarBurst";
 import DangerFlash from "./DangerFlash";
-import MediaPipeFaceController from "./MediaPipeFaceController";
 
 type GameState =
   | "waiting"
+  | "inputModeSelection"
+  | "ready"
   | "idle"
   | "countdown"
   | "reveal"
@@ -21,10 +22,12 @@ type GameState =
   | "gameComplete";
 type Direction = "left" | "right";
 type Outcome = "win" | "lose";
+type InputMode = "face" | "click";
 
 export default function ChamGame() {
   const { playSound } = useSound({ volume: 0.5 });
   const [gameState, setGameState] = useState<GameState>("waiting");
+  const [inputMode, setInputMode] = useState<InputMode | undefined>(undefined);
   const [currentStage, setCurrentStage] = useState<number>(1);
   const [winStreak, setWinStreak] = useState<number>(0);
   const [countdownNumber, setCountdownNumber] = useState<number | undefined>(
@@ -35,25 +38,40 @@ export default function ChamGame() {
   );
   const [cpuChoice, setCpuChoice] = useState<Direction | undefined>(undefined);
   const [outcome, setOutcome] = useState<Outcome | undefined>(undefined);
-  const [faceDetectionEnabled, setFaceDetectionEnabled] = useState(false);
 
   const handleSelect = useCallback(
     (direction: Direction) => {
-      if (gameState !== "idle") return;
+      if (gameState !== "idle" && gameState !== "countdown") return;
 
-      setPlayerChoice(direction);
-      setGameState("countdown");
-      setCountdownNumber(3);
+      // 클릭 모드일 때만 즉시 선택
+      if (inputMode === "click" && gameState === "idle") {
+        setPlayerChoice(direction);
+        setGameState("countdown");
+        setCountdownNumber(3);
+      }
+      // 얼굴 모드일 때는 3번째 "참"에서만 선택
+      else if (
+        inputMode === "face" &&
+        gameState === "countdown" &&
+        countdownNumber === 1
+      ) {
+        setPlayerChoice(direction);
+      }
     },
-    [gameState]
+    [gameState, inputMode, countdownNumber]
   );
 
   const handleFaceDirection = useCallback(
     (direction: Direction) => {
-      if (gameState !== "idle" || !faceDetectionEnabled) return;
-      handleSelect(direction);
+      // 얼굴 모드일 때 카운트다운 중이면 얼굴 방향을 계속 받음
+      if (gameState === "countdown" && inputMode === "face") {
+        // 3번째 "참"일 때만 선택 확정
+        if (countdownNumber === 1) {
+          setPlayerChoice(direction);
+        }
+      }
     },
-    [gameState, faceDetectionEnabled, handleSelect]
+    [gameState, countdownNumber, inputMode]
   );
 
   useEffect(() => {
@@ -65,18 +83,32 @@ export default function ChamGame() {
             | "countdown-2"
             | "countdown-1"
         );
+        // 3번째 "참"일 때는 더 긴 시간을 줘서 얼굴 인식할 시간 확보
+        const delay =
+          countdownNumber === 1 && inputMode === "face" ? 2000 : 800;
         const timer = setTimeout(() => {
           setCountdownNumber(countdownNumber - 1);
-        }, 800);
+        }, delay);
         return () => clearTimeout(timer);
       } else {
+        // 카운트다운이 끝났을 때 (3번째 "참" 이후)
         const cpuDirection: Direction = Math.random() < 0.5 ? "left" : "right";
         const timer = setTimeout(() => {
+          // countdownNumber를 undefined로 리셋하여 "참" 텍스트가 사라지도록 함
+          setCountdownNumber(undefined);
+
+          // 얼굴 모드이고 아직 선택이 안 되었다면 기본값 설정
+          const finalChoice =
+            inputMode === "face" && !playerChoice ? "left" : playerChoice;
+          if (finalChoice) {
+            setPlayerChoice(finalChoice);
+          }
+
           setCpuChoice(cpuDirection);
           setGameState("reveal");
 
           setTimeout(() => {
-            const isWin = playerChoice !== cpuDirection;
+            const isWin = finalChoice !== cpuDirection;
             setOutcome(isWin ? "win" : "lose");
             if (isWin) {
               setWinStreak((prev) => prev + 1);
@@ -93,14 +125,30 @@ export default function ChamGame() {
         return () => clearTimeout(timer);
       }
     }
-  }, [gameState, countdownNumber, playerChoice, currentStage, playSound]);
+  }, [
+    gameState,
+    countdownNumber,
+    playerChoice,
+    currentStage,
+    playSound,
+    inputMode,
+  ]);
 
-  const handleStart = useCallback(() => {
-    setGameState("idle");
+  const handleInputModeSelect = useCallback((mode: InputMode) => {
+    setInputMode(mode);
+    if (mode === "click") {
+      // 클릭 모드는 바로 idle로
+      setGameState("idle");
+    } else {
+      // 얼굴 모드는 바로 카운트다운 시작
+      setGameState("countdown");
+      setCountdownNumber(3);
+    }
   }, []);
 
   const handleReset = useCallback(() => {
     setGameState("waiting");
+    setInputMode(undefined);
     setCurrentStage(1);
     setWinStreak(0);
     setCountdownNumber(undefined);
@@ -111,12 +159,20 @@ export default function ChamGame() {
 
   const handleNextStage = useCallback(() => {
     setCurrentStage((prev) => prev + 1);
-    setGameState("idle");
     setCountdownNumber(undefined);
     setPlayerChoice(undefined);
     setCpuChoice(undefined);
     setOutcome(undefined);
-  }, []);
+
+    // inputMode에 따라 다음 라운드 시작
+    if (inputMode === "click") {
+      setGameState("idle");
+    } else if (inputMode === "face") {
+      // 얼굴 모드는 바로 카운트다운 시작
+      setGameState("countdown");
+      setCountdownNumber(3);
+    }
+  }, [inputMode]);
 
   useEffect(() => {
     if (gameState === "reveal") {
@@ -161,10 +217,6 @@ export default function ChamGame() {
 
   return (
     <div className='h-screen flex flex-col items-center justify-center p-2 md:p-4 relative z-10'>
-      <MediaPipeFaceController
-        onDirectionDetected={handleFaceDirection}
-        enabled={faceDetectionEnabled && gameState === "idle"}
-      />
       <StarBurst
         trigger={showStarBurst}
         particleCount={particleCount}
@@ -190,21 +242,14 @@ export default function ChamGame() {
             fontFamily: "var(--font-pixel), monospace",
             letterSpacing: "0.1em",
           }}>
-          {currentStage <= 3 && `🎯 ROUND ${currentStage}/3 🎯`}
+          {currentStage <= 3 &&
+            gameState !== "waiting" &&
+            gameState !== "inputModeSelection" &&
+            gameState !== "ready" &&
+            `🎯 ROUND ${currentStage}/3 🎯`}
         </motion.div>
 
         <div className='w-full flex items-center justify-center gap-4 md:gap-6 relative'>
-          {/* Left Daromi - slightly off-center, casual placement */}
-          {/* <div className='hidden md:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-8 w-48 h-48 opacity-75 rotate-[-12deg] z-0 pointer-events-none'>
-            <Image
-              src='/daromi.png'
-              alt='Daromi Left'
-              fill
-              className='object-contain drop-shadow-[0_0_20px_rgba(0,255,255,0.4)]'
-              priority
-            />
-          </div> */}
-
           <MainScreen
             state={gameState}
             countdownNumber={countdownNumber}
@@ -213,73 +258,24 @@ export default function ChamGame() {
             playerChoice={playerChoice}
             currentStage={currentStage}
             winStreak={winStreak}
+            inputMode={inputMode}
+            onFaceDirectionDetected={handleFaceDirection}
+            onInputModeSelect={handleInputModeSelect}
           />
-
-          {/* Right Daromi - slightly off-center, casual placement */}
-          {/* <div className='hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-8 w-48 h-48 opacity-75 rotate-12 z-0 pointer-events-none'>
-            <Image
-              src='/daromi.png'
-              alt='Daromi Right'
-              fill
-              className='object-contain drop-shadow-[0_0_20px_rgba(0,255,255,0.4)]'
-              priority
-            />
-          </div> */}
         </div>
 
-        {gameState === "waiting" && (
-          <motion.button
-            className='pixel-button text-xl md:text-2xl px-8 md:px-10 py-5 md:py-6 font-bold flex items-center justify-center gap-3 rounded-xl border-cyan-500 bg-cyan-900/30 text-cyan-400'
-            onClick={handleStart}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              boxShadow: "0 0 30px #00ffff, 0 0 60px #00ffff",
-            }}
-            whileHover={{
-              scale: 1.1,
-              boxShadow: "0 0 40px #00ffff, 0 0 80px #00ffff",
-            }}
-            transition={{ duration: 0.3 }}>
-            <FaPlay className='text-2xl md:text-3xl' />
-            <span>START</span>
-          </motion.button>
-        )}
-
-        {gameState !== "waiting" && (
-          <div className='flex flex-col items-center gap-3'>
-            <div className='flex flex-col md:flex-row gap-2 md:gap-3 items-center'>
-              <PixelButton
-                direction='left'
-                onClick={() => handleSelect("left")}
-                disabled={gameState !== "idle"}
-              />
-              <PixelButton
-                direction='right'
-                onClick={() => handleSelect("right")}
-                disabled={gameState !== "idle"}
-              />
-            </div>
-            {gameState === "idle" && (
-              <motion.button
-                className='pixel-button text-sm md:text-base px-4 md:px-5 py-2 md:py-3 font-bold flex items-center justify-center gap-2 rounded-md'
-                onClick={() => setFaceDetectionEnabled(!faceDetectionEnabled)}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                style={{
-                  boxShadow: faceDetectionEnabled
-                    ? "0 0 20px #00ff00, 0 0 40px #00ff00"
-                    : "0 0 10px rgba(0, 255, 255, 0.5)",
-                }}
-                whileHover={{
-                  scale: 1.05,
-                }}>
-                <span>
-                  {faceDetectionEnabled ? "얼굴 감지 OFF" : "얼굴 감지 ON"}
-                </span>
-              </motion.button>
-            )}
+        {gameState === "idle" && inputMode === "click" && (
+          <div className='flex flex-col md:flex-row gap-2 md:gap-3 items-center'>
+            <PixelButton
+              direction='left'
+              onClick={() => handleSelect("left")}
+              disabled={false}
+            />
+            <PixelButton
+              direction='right'
+              onClick={() => handleSelect("right")}
+              disabled={false}
+            />
           </div>
         )}
 

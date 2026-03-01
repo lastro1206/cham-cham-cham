@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useState } from "react";
+import { motion } from "framer-motion";
+import { FaRegHandPointLeft, FaRegHandPointRight } from "react-icons/fa";
 
 interface MediaPipeFaceControllerProps {
   onDirectionDetected: (direction: "left" | "right") => void;
   enabled: boolean;
+  fullscreen?: boolean;
 }
 
 type FaceLandmark = {
@@ -31,6 +34,7 @@ interface FaceMeshInstance {
 export default function MediaPipeFaceController({
   onDirectionDetected,
   enabled,
+  fullscreen = false,
 }: MediaPipeFaceControllerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const faceMeshRef = useRef<FaceMeshInstance | null>(null);
@@ -157,48 +161,82 @@ export default function MediaPipeFaceController({
     let cancelled = false;
 
     const setup = async () => {
-      if (!videoRef.current) return;
+      if (!videoRef.current || cancelled) return;
 
-      // 1) 카메라 스트림 가져오기
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480 },
-        audio: false,
-      });
-      streamRef.current = stream;
+      try {
+        // 1) 카메라 스트림 가져오기
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 640, height: 480 },
+          audio: false,
+        });
 
-      videoRef.current.srcObject = stream;
-      await videoRef.current.play();
+        if (cancelled || !videoRef.current) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
 
-      if (cancelled) return;
+        streamRef.current = stream;
 
-      // 2) FaceMesh 동적 import
-      const FaceMeshModule = await import("@mediapipe/face_mesh");
-      const FaceMesh = FaceMeshModule.FaceMesh;
+        if (!videoRef.current) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
 
-      const faceMesh = new FaceMesh({
-        locateFile: (file: string) =>
-          `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
-      }) as FaceMeshInstance;
+        videoRef.current.srcObject = stream;
 
-      faceMesh.setOptions({
-        maxNumFaces: 1,
-        refineLandmarks: true,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5,
-      });
+        try {
+          await videoRef.current.play();
+        } catch (playError) {
+          // play() 에러는 무시 (이미 재생 중이거나 중단된 경우)
+          console.warn("Video play error:", playError);
+        }
 
-      faceMesh.onResults(onResults);
-      faceMeshRef.current = faceMesh;
+        if (cancelled || !videoRef.current) return;
 
-      // 3) 렌더 루프
-      const render = async () => {
-        if (cancelled || !videoRef.current || !faceMeshRef.current) return;
+        // 2) FaceMesh 동적 import
+        const FaceMeshModule = await import("@mediapipe/face_mesh");
 
-        await faceMeshRef.current.send({ image: videoRef.current });
-        animationFrameRef.current = requestAnimationFrame(render);
-      };
+        if (cancelled || !videoRef.current) return;
 
-      render();
+        const FaceMesh = FaceMeshModule.FaceMesh;
+
+        const faceMesh = new FaceMesh({
+          locateFile: (file: string) =>
+            `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
+        }) as FaceMeshInstance;
+
+        faceMesh.setOptions({
+          maxNumFaces: 1,
+          refineLandmarks: true,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5,
+        });
+
+        faceMesh.onResults(onResults);
+        faceMeshRef.current = faceMesh;
+
+        // 3) 렌더 루프
+        const render = async () => {
+          if (cancelled || !videoRef.current || !faceMeshRef.current) return;
+
+          try {
+            await faceMeshRef.current.send({ image: videoRef.current });
+            if (!cancelled && videoRef.current && faceMeshRef.current) {
+              animationFrameRef.current = requestAnimationFrame(render);
+            }
+          } catch (error) {
+            console.warn("FaceMesh send error:", error);
+          }
+        };
+
+        render();
+      } catch (error) {
+        console.error("MediaPipe setup error:", error);
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((t) => t.stop());
+          streamRef.current = null;
+        }
+      }
     };
 
     setup().catch((err) => {
@@ -207,6 +245,7 @@ export default function MediaPipeFaceController({
 
     return () => {
       cancelled = true;
+      const videoElement = videoRef.current;
       if (animationFrameRef.current !== null) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
@@ -214,6 +253,10 @@ export default function MediaPipeFaceController({
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((t) => t.stop());
         streamRef.current = null;
+      }
+      if (videoElement) {
+        videoElement.srcObject = null;
+        videoElement.pause();
       }
       if (detectionTimeoutRef.current) {
         clearTimeout(detectionTimeoutRef.current);
@@ -227,16 +270,90 @@ export default function MediaPipeFaceController({
 
   if (!enabled) return null;
 
+  // 풀스크린 모드 (큰 화면에 표시)
+  if (fullscreen) {
+    return (
+      <div className='w-full h-full flex items-center justify-center relative bg-black/50'>
+        <video
+          ref={videoRef}
+          className='w-full h-full object-cover scale-x-[-1]'
+          playsInline
+          muted
+          autoPlay
+        />
+        <div className='absolute top-4 left-1/2 -translate-x-1/2 bg-black/80 text-lg md:text-xl text-cyan-400 text-center px-6 py-3 rounded-lg font-pixel border-2 border-cyan-400 z-30'>
+          얼굴 방향을 보여주세요!
+        </div>
+        {/* 방향 표시 */}
+        {debugInfo.detectedDirection &&
+          debugInfo.detectedDirection !== "center" && (
+            <motion.div
+              className='absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center justify-center gap-3 z-30'
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              style={{
+                fontFamily: "var(--font-pixel), monospace",
+              }}>
+              {debugInfo.detectedDirection === "left" ? (
+                <>
+                  <FaRegHandPointLeft
+                    className='text-4xl md:text-6xl'
+                    style={{
+                      color: "#3b82f6",
+                      textShadow: "0 0 20px #3b82f6",
+                    }}
+                  />
+                  <span
+                    className='text-3xl md:text-5xl font-bold'
+                    style={{
+                      color: "#3b82f6",
+                      filter: "drop-shadow(0 0 20px #3b82f6)",
+                    }}>
+                    LEFT
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span
+                    className='text-3xl md:text-5xl font-bold'
+                    style={{
+                      color: "#3b82f6",
+                      textShadow: "0 0 20px #3b82f6",
+                    }}>
+                    RIGHT
+                  </span>
+                  <FaRegHandPointRight
+                    className='text-4xl md:text-6xl'
+                    style={{
+                      color: "#3b82f6",
+                      filter: "drop-shadow(0 0 20px #3b82f6)",
+                    }}
+                  />
+                </>
+              )}
+            </motion.div>
+          )}
+      </div>
+    );
+  }
+
+  // 작은 디버깅 모드 (기존)
   const getDirectionColor = (direction: "left" | "right" | "center" | null) => {
     if (direction === "left") return "text-red-400";
     if (direction === "right") return "text-blue-400";
     return "text-gray-400";
   };
 
+  const getDirectionIcon = (direction: "left" | "right" | "center" | null) => {
+    if (direction === "left") return FaRegHandPointLeft;
+    if (direction === "right") return FaRegHandPointRight;
+    return null;
+  };
+
   const getDirectionText = (direction: "left" | "right" | "center" | null) => {
-    if (direction === "left") return "⬅️ LEFT";
-    if (direction === "right") return "➡️ RIGHT";
-    return "⬆️ CENTER";
+    if (direction === "left") return "LEFT";
+    if (direction === "right") return "RIGHT";
+    return "CENTER";
   };
 
   return (
@@ -262,9 +379,21 @@ export default function MediaPipeFaceController({
         </div>
 
         <div className='space-y-1'>
-          <div className='flex justify-between'>
+          <div className='flex justify-between items-center'>
             <span>방향:</span>
-            <span className={getDirectionColor(debugInfo.detectedDirection)}>
+            <span
+              className={`flex items-center gap-1 ${getDirectionColor(
+                debugInfo.detectedDirection
+              )}`}>
+              {getDirectionIcon(debugInfo.detectedDirection) && (
+                <>
+                  {debugInfo.detectedDirection === "left" ? (
+                    <FaRegHandPointLeft className='text-sm' />
+                  ) : (
+                    <FaRegHandPointRight className='text-sm' />
+                  )}
+                </>
+              )}
               {getDirectionText(debugInfo.detectedDirection)}
             </span>
           </div>
