@@ -44,24 +44,25 @@ export default function MainScreen({
   onFaceDirectionDetected,
   onInputModeSelect,
 }: MainScreenProps) {
-  // 얼굴 모드일 때 카운트다운 중이면 얼굴 인식 활성화
+  // 얼굴 모드일 때 마지막 "참"일 때만 얼굴 인식 활성화
   const isFaceDetectionActive =
     state === "countdown" &&
+    countdownNumber !== undefined &&
+    (countdownNumber === 1 || countdownNumber === 0) &&
     inputMode === "face" &&
     onFaceDirectionDetected !== undefined;
 
-  // 3번째 "참"일 때 큰 화면에 표시
+  // 마지막 "참"일 때만 큰 화면에 표시 (countdownNumber === 1 또는 0)
   const isFullscreenFaceDetection =
     state === "countdown" &&
-    countdownNumber === 1 &&
+    countdownNumber !== undefined &&
+    (countdownNumber === 1 || countdownNumber === 0) &&
     inputMode === "face" &&
     onFaceDirectionDetected !== undefined;
 
-  // 얼굴 모드일 때 항상 디버깅 화면 표시 (3번째 "참"이 아닐 때도)
+  // 얼굴 모드일 때 항상 디버깅 화면 표시 (큰 화면이 표시될 때도 함께 표시)
   const showFaceDebug =
-    inputMode === "face" &&
-    onFaceDirectionDetected !== undefined &&
-    !isFullscreenFaceDetection;
+    inputMode === "face" && onFaceDirectionDetected !== undefined;
   return (
     <div className='main-screen scanline w-full max-w-3xl mx-auto aspect-[4/3] flex items-center justify-center relative overflow-hidden'>
       {/* Win Streak Display */}
@@ -94,7 +95,7 @@ export default function MainScreen({
         </motion.div>
       )}
 
-      {/* 얼굴 인식 화면 (3번째 "참"일 때 큰 화면에 표시) */}
+      {/* 얼굴 인식 화면 (카운트다운 전체 기간 동안 큰 화면에 표시) */}
       {isFullscreenFaceDetection && onFaceDirectionDetected && (
         <div className='absolute inset-0 z-20 flex items-center justify-center'>
           <MediaPipeFaceController
@@ -105,7 +106,7 @@ export default function MainScreen({
         </div>
       )}
 
-      {/* 디버깅 화면 (얼굴 모드일 때 카운트다운 중이지만 3번째 "참"이 아닐 때) */}
+      {/* 디버깅 화면 (얼굴 모드일 때 항상 표시, 큰 화면이 아닐 때) */}
       {showFaceDebug && onFaceDirectionDetected && (
         <div className='fixed top-4 right-4 z-50'>
           <MediaPipeFaceController

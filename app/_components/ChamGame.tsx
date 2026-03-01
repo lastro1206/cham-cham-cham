@@ -63,10 +63,10 @@ export default function ChamGame() {
 
   const handleFaceDirection = useCallback(
     (direction: Direction) => {
-      // 얼굴 모드일 때 카운트다운 중이면 얼굴 방향을 계속 받음
+      // 얼굴 모드일 때 카운트다운 중이거나 방향을 기다리는 중이면 얼굴 방향을 받음
       if (gameState === "countdown" && inputMode === "face") {
-        // 3번째 "참"일 때만 선택 확정
-        if (countdownNumber === 1) {
+        // 마지막 "참" (countdownNumber === 1) 이후 방향이 확정되면 선택
+        if (countdownNumber === 1 || countdownNumber === 0) {
           setPlayerChoice(direction);
         }
       }
@@ -91,38 +91,36 @@ export default function ChamGame() {
         }, delay);
         return () => clearTimeout(timer);
       } else {
-        // 카운트다운이 끝났을 때 (3번째 "참" 이후)
-        const cpuDirection: Direction = Math.random() < 0.5 ? "left" : "right";
-        const timer = setTimeout(() => {
-          // countdownNumber를 undefined로 리셋하여 "참" 텍스트가 사라지도록 함
-          setCountdownNumber(undefined);
+        // 카운트다운이 끝났을 때 (countdownNumber === 0)
+        // 클릭 모드는 바로 진행
+        if (inputMode === "click") {
+          const cpuDirection: Direction =
+            Math.random() < 0.5 ? "left" : "right";
+          const timer = setTimeout(() => {
+            setCountdownNumber(undefined);
+            setCpuChoice(cpuDirection);
+            setGameState("reveal");
 
-          // 얼굴 모드이고 아직 선택이 안 되었다면 기본값 설정
-          const finalChoice =
-            inputMode === "face" && !playerChoice ? "left" : playerChoice;
-          if (finalChoice) {
-            setPlayerChoice(finalChoice);
-          }
-
-          setCpuChoice(cpuDirection);
-          setGameState("reveal");
-
-          setTimeout(() => {
-            const isWin = finalChoice !== cpuDirection;
-            setOutcome(isWin ? "win" : "lose");
-            if (isWin) {
-              setWinStreak((prev) => prev + 1);
-              if (currentStage >= 3) {
-                setGameState("gameComplete");
+            setTimeout(() => {
+              const isWin = playerChoice !== cpuDirection;
+              setOutcome(isWin ? "win" : "lose");
+              if (isWin) {
+                setWinStreak((prev) => prev + 1);
+                if (currentStage >= 3) {
+                  setGameState("gameComplete");
+                } else {
+                  setGameState("stageComplete");
+                }
               } else {
-                setGameState("stageComplete");
+                setGameState("result");
               }
-            } else {
-              setGameState("result");
-            }
-          }, 2000);
-        }, 0);
-        return () => clearTimeout(timer);
+            }, 2000);
+          }, 0);
+          return () => clearTimeout(timer);
+        }
+        // 얼굴 모드는 방향이 확정될 때까지 countdown 상태 유지
+        // countdownNumber를 0으로 유지하여 방향 입력을 기다림
+        // handleFaceDirection에서 방향이 확정되면 playerChoice가 설정됨
       }
     }
   }, [
@@ -133,6 +131,39 @@ export default function ChamGame() {
     playSound,
     inputMode,
   ]);
+
+  // 얼굴 모드에서 방향이 확정되면 reveal로 넘어감
+  useEffect(() => {
+    if (
+      gameState === "countdown" &&
+      countdownNumber === 0 &&
+      inputMode === "face" &&
+      playerChoice !== undefined
+    ) {
+      const cpuDirection: Direction = Math.random() < 0.5 ? "left" : "right";
+      const timer = setTimeout(() => {
+        setCountdownNumber(undefined);
+        setCpuChoice(cpuDirection);
+        setGameState("reveal");
+
+        setTimeout(() => {
+          const isWin = playerChoice !== cpuDirection;
+          setOutcome(isWin ? "win" : "lose");
+          if (isWin) {
+            setWinStreak((prev) => prev + 1);
+            if (currentStage >= 3) {
+              setGameState("gameComplete");
+            } else {
+              setGameState("stageComplete");
+            }
+          } else {
+            setGameState("result");
+          }
+        }, 2000);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState, countdownNumber, inputMode, playerChoice, currentStage]);
 
   const handleInputModeSelect = useCallback((mode: InputMode) => {
     setInputMode(mode);
