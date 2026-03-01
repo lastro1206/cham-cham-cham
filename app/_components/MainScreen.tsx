@@ -5,6 +5,7 @@ import Image from "next/image";
 import GlitchArrow from "./GlitchArrow";
 
 type GameState =
+  | "waiting"
   | "idle"
   | "countdown"
   | "reveal"
@@ -66,6 +67,56 @@ export default function MainScreen({
       )}
 
       <AnimatePresence mode='wait'>
+        {state === "waiting" && (
+          <motion.div
+            key='waiting'
+            className='flex flex-col items-center gap-4 md:gap-6'
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+            }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.5 }}>
+            <motion.div
+              className='relative w-64 h-64 md:w-96 md:h-96 flex items-center justify-center'
+              animate={{
+                scale: [1, 1.05, 1],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}>
+              <Image
+                src='/jeongmeon.png'
+                alt='Jungmeon Character'
+                fill
+                className='object-contain'
+                priority
+              />
+            </motion.div>
+            <motion.div
+              className='text-2xl md:text-4xl text-white font-bold'
+              animate={{
+                opacity: [0.7, 1, 0.7],
+                scale: [1, 1.05, 1],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              style={{
+                textShadow: "0 0 10px #ffffff, 0 0 20px #ffffff",
+                fontFamily: "var(--font-pixel), monospace",
+                letterSpacing: "0.1em",
+              }}>
+              게임을 시작하세요!
+            </motion.div>
+          </motion.div>
+        )}
+
         {state === "idle" && (
           <motion.div
             key='idle'
@@ -120,17 +171,10 @@ export default function MainScreen({
           <motion.div
             key={`countdown-${countdownNumber}`}
             className='text-6xl md:text-8xl text-yellow-400 font-bold'
-            initial={{ opacity: 0, scale: 0.3, rotate: -180 }}
-            animate={{
-              opacity: [0, 1, 1, 0],
-              scale: [0.3, 1.5, 1.2, 0.8],
-              rotate: [0, 360, 0],
-            }}
-            exit={{ opacity: 0, scale: 0.3 }}
-            transition={{
-              duration: 0.5,
-              times: [0, 0.2, 0.7, 1],
-            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             style={{
               fontFamily: 'var(--font-pixel), "Courier New", monospace',
               textShadow: "0 0 15px #ffaa00, 0 0 30px #ffaa00",
@@ -221,7 +265,7 @@ export default function MainScreen({
         {state === "stageComplete" && (
           <motion.div
             key='stageComplete'
-            className='flex flex-col items-center gap-2'
+            className='flex flex-col items-center gap-6'
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}>
