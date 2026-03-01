@@ -6,7 +6,6 @@ import { FaRedo } from "react-icons/fa";
 import { MdKeyboardDoubleArrowRight } from "react-icons/md";
 import { useSound } from "../_hooks/useSound";
 import MainScreen from "./MainScreen";
-import PixelButton from "./PixelButton";
 import StarBurst from "./StarBurst";
 import DangerFlash from "./DangerFlash";
 
@@ -43,17 +42,26 @@ export default function ChamGame() {
     (direction: Direction) => {
       if (gameState !== "idle" && gameState !== "countdown") return;
 
-      // 클릭 모드일 때만 즉시 선택
-      if (inputMode === "click" && gameState === "idle") {
-        setPlayerChoice(direction);
-        setGameState("countdown");
-        setCountdownNumber(3);
+      // 클릭 모드일 때
+      if (inputMode === "click") {
+        if (gameState === "idle") {
+          // 처음 시작할 때
+          setPlayerChoice(direction);
+          setGameState("countdown");
+          setCountdownNumber(3);
+        } else if (
+          gameState === "countdown" &&
+          (countdownNumber === 1 || countdownNumber === 0)
+        ) {
+          // 마지막 "참" 이후 방향 선택
+          setPlayerChoice(direction);
+        }
       }
       // 얼굴 모드일 때는 3번째 "참"에서만 선택
       else if (
         inputMode === "face" &&
         gameState === "countdown" &&
-        countdownNumber === 1
+        (countdownNumber === 1 || countdownNumber === 0)
       ) {
         setPlayerChoice(direction);
       }
@@ -92,35 +100,9 @@ export default function ChamGame() {
         return () => clearTimeout(timer);
       } else {
         // 카운트다운이 끝났을 때 (countdownNumber === 0)
-        // 클릭 모드는 바로 진행
-        if (inputMode === "click") {
-          const cpuDirection: Direction =
-            Math.random() < 0.5 ? "left" : "right";
-          const timer = setTimeout(() => {
-            setCountdownNumber(undefined);
-            setCpuChoice(cpuDirection);
-            setGameState("reveal");
-
-            setTimeout(() => {
-              const isWin = playerChoice !== cpuDirection;
-              setOutcome(isWin ? "win" : "lose");
-              if (isWin) {
-                setWinStreak((prev) => prev + 1);
-                if (currentStage >= 3) {
-                  setGameState("gameComplete");
-                } else {
-                  setGameState("stageComplete");
-                }
-              } else {
-                setGameState("result");
-              }
-            }, 2000);
-          }, 0);
-          return () => clearTimeout(timer);
-        }
-        // 얼굴 모드는 방향이 확정될 때까지 countdown 상태 유지
+        // 클릭 모드와 얼굴 모드 모두 방향이 확정될 때까지 countdown 상태 유지
         // countdownNumber를 0으로 유지하여 방향 입력을 기다림
-        // handleFaceDirection에서 방향이 확정되면 playerChoice가 설정됨
+        // handleSelect 또는 handleFaceDirection에서 방향이 확정되면 playerChoice가 설정됨
       }
     }
   }, [
@@ -132,12 +114,11 @@ export default function ChamGame() {
     inputMode,
   ]);
 
-  // 얼굴 모드에서 방향이 확정되면 reveal로 넘어감
+  // 클릭 모드와 얼굴 모드에서 방향이 확정되면 reveal로 넘어감
   useEffect(() => {
     if (
       gameState === "countdown" &&
       countdownNumber === 0 &&
-      inputMode === "face" &&
       playerChoice !== undefined
     ) {
       const cpuDirection: Direction = Math.random() < 0.5 ? "left" : "right";
@@ -163,7 +144,7 @@ export default function ChamGame() {
       }, 0);
       return () => clearTimeout(timer);
     }
-  }, [gameState, countdownNumber, inputMode, playerChoice, currentStage]);
+  }, [gameState, countdownNumber, playerChoice, currentStage]);
 
   const handleInputModeSelect = useCallback((mode: InputMode) => {
     setInputMode(mode);
@@ -292,23 +273,9 @@ export default function ChamGame() {
             inputMode={inputMode}
             onFaceDirectionDetected={handleFaceDirection}
             onInputModeSelect={handleInputModeSelect}
+            onSelect={handleSelect}
           />
         </div>
-
-        {gameState === "idle" && inputMode === "click" && (
-          <div className='flex flex-col md:flex-row gap-2 md:gap-3 items-center'>
-            <PixelButton
-              direction='left'
-              onClick={() => handleSelect("left")}
-              disabled={false}
-            />
-            <PixelButton
-              direction='right'
-              onClick={() => handleSelect("right")}
-              disabled={false}
-            />
-          </div>
-        )}
 
         {(gameState === "result" || gameState === "gameComplete") && (
           <motion.button

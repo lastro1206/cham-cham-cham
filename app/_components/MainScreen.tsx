@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import GlitchArrow from "./GlitchArrow";
 import MediaPipeFaceController from "./MediaPipeFaceController";
+import PixelButton from "./PixelButton";
 
 type GameState =
   | "waiting"
@@ -30,6 +31,7 @@ interface MainScreenProps {
   inputMode?: InputMode;
   onFaceDirectionDetected?: (direction: Direction) => void;
   onInputModeSelect?: (mode: InputMode) => void;
+  onSelect?: (direction: Direction) => void;
 }
 
 export default function MainScreen({
@@ -43,6 +45,7 @@ export default function MainScreen({
   inputMode,
   onFaceDirectionDetected,
   onInputModeSelect,
+  onSelect,
 }: MainScreenProps) {
   // 얼굴 모드일 때 마지막 "참"일 때만 얼굴 인식 활성화
   const isFaceDetectionActive =
@@ -230,8 +233,41 @@ export default function MainScreen({
               }}>
               방향을 선택하세요!
             </motion.div>
+            {inputMode === "click" && onSelect && (
+              <div className='flex flex-col md:flex-row gap-3 md:gap-4 mt-4'>
+                <PixelButton
+                  direction='left'
+                  onClick={() => onSelect("left")}
+                  disabled={false}
+                />
+                <PixelButton
+                  direction='right'
+                  onClick={() => onSelect("right")}
+                  disabled={false}
+                />
+              </div>
+            )}
           </motion.div>
         )}
+
+        {state === "countdown" &&
+          countdownNumber !== undefined &&
+          (countdownNumber === 1 || countdownNumber === 0) &&
+          inputMode === "click" &&
+          onSelect && (
+            <div className='absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col md:flex-row gap-3 md:gap-4 z-30'>
+              <PixelButton
+                direction='left'
+                onClick={() => onSelect("left")}
+                disabled={false}
+              />
+              <PixelButton
+                direction='right'
+                onClick={() => onSelect("right")}
+                disabled={false}
+              />
+            </div>
+          )}
 
         {state === "countdown" &&
           countdownNumber !== undefined &&
