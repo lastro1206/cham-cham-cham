@@ -49,12 +49,11 @@ export default function ChamGame() {
           setPlayerChoice(direction);
           setGameState("countdown");
           setCountdownNumber(3);
-        } else if (
-          gameState === "countdown" &&
-          (countdownNumber === 1 || countdownNumber === 0)
-        ) {
-          // 마지막 "참" 이후 방향 선택
+        } else if (gameState === "countdown" && countdownNumber === 1) {
+          // 마지막 "참"에서 방향 선택 시 바로 reveal로 넘어감
           setPlayerChoice(direction);
+          // countdownNumber를 0으로 설정하여 reveal로 넘어가도록 함
+          setCountdownNumber(0);
         }
       }
       // 얼굴 모드일 때는 3번째 "참"에서만 선택
@@ -91,7 +90,15 @@ export default function ChamGame() {
             | "countdown-2"
             | "countdown-1"
         );
-        // 3번째 "참"일 때는 더 긴 시간을 줘서 얼굴 인식할 시간 확보
+
+        // 클릭 모드에서 마지막 "참" (countdownNumber === 1)일 때는 카운트다운을 멈춤
+        // 사용자가 버튼을 클릭할 때까지 기다림
+        if (inputMode === "click" && countdownNumber === 1) {
+          // 카운트다운을 멈추고 사용자 입력을 기다림
+          return;
+        }
+
+        // 얼굴 모드에서 3번째 "참"일 때는 더 긴 시간을 줘서 얼굴 인식할 시간 확보
         const delay =
           countdownNumber === 1 && inputMode === "face" ? 2000 : 800;
         const timer = setTimeout(() => {
@@ -100,9 +107,8 @@ export default function ChamGame() {
         return () => clearTimeout(timer);
       } else {
         // 카운트다운이 끝났을 때 (countdownNumber === 0)
-        // 클릭 모드와 얼굴 모드 모두 방향이 확정될 때까지 countdown 상태 유지
-        // countdownNumber를 0으로 유지하여 방향 입력을 기다림
-        // handleSelect 또는 handleFaceDirection에서 방향이 확정되면 playerChoice가 설정됨
+        // 얼굴 모드에서만 방향이 확정될 때까지 countdown 상태 유지
+        // 클릭 모드는 이미 countdownNumber === 1에서 멈춰있음
       }
     }
   }, [
@@ -149,7 +155,7 @@ export default function ChamGame() {
   const handleInputModeSelect = useCallback((mode: InputMode) => {
     setInputMode(mode);
     if (mode === "click") {
-      // 클릭 모드는 바로 idle로
+      // 클릭 모드는 바로 idle로, 그 다음 자동으로 카운트다운 시작
       setGameState("idle");
     } else {
       // 얼굴 모드는 바로 카운트다운 시작
@@ -157,6 +163,17 @@ export default function ChamGame() {
       setCountdownNumber(3);
     }
   }, []);
+
+  // 클릭 모드에서 idle 상태일 때 자동으로 카운트다운 시작
+  useEffect(() => {
+    if (gameState === "idle" && inputMode === "click") {
+      const timer = setTimeout(() => {
+        setGameState("countdown");
+        setCountdownNumber(3);
+      }, 1000); // 1초 후 자동으로 카운트다운 시작
+      return () => clearTimeout(timer);
+    }
+  }, [gameState, inputMode]);
 
   const handleReset = useCallback(() => {
     setGameState("waiting");

@@ -215,26 +215,46 @@ export default function MainScreen({
                 priority
               />
             </motion.div>
-            <motion.div
-              className='text-2xl md:text-4xl text-white font-normal'
-              animate={{
-                opacity: [0.7, 1, 0.7],
-                scale: [1, 1.05, 1],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              style={{
-                textShadow: "0 0 10px #ffffff, 0 0 20px #ffffff",
-                fontFamily: "var(--font-pixel), monospace",
-                letterSpacing: "0.1em",
-              }}>
-              방향을 선택하세요!
-            </motion.div>
-            {inputMode === "click" && onSelect && (
-              <div className='flex flex-col md:flex-row gap-3 md:gap-4 mt-4'>
+          </motion.div>
+        )}
+
+        {state === "countdown" &&
+          countdownNumber !== undefined &&
+          countdownNumber === 1 &&
+          inputMode === "click" &&
+          onSelect && (
+            <>
+              <motion.div
+                className='absolute bottom-24 md:bottom-28 left-1/2 -translate-x-1/2 z-30'
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3 }}>
+                <motion.div
+                  className='text-xl md:text-3xl text-white font-normal text-center'
+                  animate={{
+                    opacity: [0.7, 1, 0.7],
+                    scale: [1, 1.05, 1],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  style={{
+                    textShadow: "0 0 10px #ffffff, 0 0 20px #ffffff",
+                    fontFamily: "var(--font-pixel), monospace",
+                    letterSpacing: "0.1em",
+                  }}>
+                  방향을 선택하세요!
+                </motion.div>
+              </motion.div>
+              <motion.div
+                className='absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col md:flex-row gap-3 md:gap-4 z-30'
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3 }}>
                 <PixelButton
                   direction='left'
                   onClick={() => onSelect("left")}
@@ -245,28 +265,8 @@ export default function MainScreen({
                   onClick={() => onSelect("right")}
                   disabled={false}
                 />
-              </div>
-            )}
-          </motion.div>
-        )}
-
-        {state === "countdown" &&
-          countdownNumber !== undefined &&
-          (countdownNumber === 1 || countdownNumber === 0) &&
-          inputMode === "click" &&
-          onSelect && (
-            <div className='absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col md:flex-row gap-3 md:gap-4 z-30'>
-              <PixelButton
-                direction='left'
-                onClick={() => onSelect("left")}
-                disabled={false}
-              />
-              <PixelButton
-                direction='right'
-                onClick={() => onSelect("right")}
-                disabled={false}
-              />
-            </div>
+              </motion.div>
+            </>
           )}
 
         {state === "countdown" &&
