@@ -24,7 +24,7 @@ type Outcome = "win" | "lose";
 type InputMode = "face" | "click";
 
 export default function ChamGame() {
-  const { playSound } = useSound({ volume: 0.5 });
+  const { playSound, stopSound } = useSound({ volume: 0.5 });
   const [gameState, setGameState] = useState<GameState>("waiting");
   const [inputMode, setInputMode] = useState<InputMode | undefined>(undefined);
   const [currentStage, setCurrentStage] = useState<number>(1);
@@ -84,13 +84,6 @@ export default function ChamGame() {
   useEffect(() => {
     if (gameState === "countdown" && countdownNumber !== undefined) {
       if (countdownNumber > 0) {
-        playSound(
-          `countdown-${countdownNumber}` as
-            | "countdown-3"
-            | "countdown-2"
-            | "countdown-1"
-        );
-
         // 클릭 모드에서 마지막 "참" (countdownNumber === 1)일 때는 카운트다운을 멈춤
         // 사용자가 버튼을 클릭할 때까지 기다림
         if (inputMode === "click" && countdownNumber === 1) {
@@ -111,14 +104,7 @@ export default function ChamGame() {
         // 클릭 모드는 이미 countdownNumber === 1에서 멈춰있음
       }
     }
-  }, [
-    gameState,
-    countdownNumber,
-    playerChoice,
-    currentStage,
-    playSound,
-    inputMode,
-  ]);
+  }, [gameState, countdownNumber, playerChoice, currentStage, inputMode]);
 
   // 클릭 모드와 얼굴 모드에서 방향이 확정되면 reveal로 넘어감
   useEffect(() => {
@@ -203,33 +189,16 @@ export default function ChamGame() {
     }
   }, [inputMode]);
 
+  // 백그라운드 음악만 재생 (컴포넌트 마운트 시 한 번만 시작하고 무한 반복)
   useEffect(() => {
-    if (gameState === "reveal") {
-      playSound("reveal");
-    }
-  }, [gameState, playSound]);
+    // 컴포넌트가 마운트될 때 한 번만 재생 시작
+    playSound("background", { loop: true });
 
-  useEffect(() => {
-    if (gameState === "result" && outcome) {
-      if (outcome === "win") {
-        playSound("success");
-      } else {
-        playSound("fail");
-      }
-    }
-  }, [gameState, outcome, playSound]);
-
-  useEffect(() => {
-    if (gameState === "stageComplete") {
-      playSound("stage-complete");
-    }
-  }, [gameState, playSound]);
-
-  useEffect(() => {
-    if (gameState === "gameComplete") {
-      playSound("game-complete");
-    }
-  }, [gameState, playSound]);
+    return () => {
+      // 컴포넌트 언마운트 시 백그라운드 음악 정지
+      stopSound("background");
+    };
+  }, [playSound, stopSound]);
 
   const showStarBurst =
     (gameState === "result" && outcome === "win") ||

@@ -6,7 +6,8 @@ export type SoundType =
   | "success"
   | "fail"
   | "stage-complete"
-  | "game-complete";
+  | "game-complete"
+  | "background";
 
 export const SOUND_PATHS: Record<SoundType, string> = {
   "countdown-3": "/sounds/countdown-3.mp3",
@@ -17,5 +18,5 @@ export const SOUND_PATHS: Record<SoundType, string> = {
   fail: "/sounds/fail.mp3",
   "stage-complete": "/sounds/stage-complete.mp3",
   "game-complete": "/sounds/game-complete.mp3",
+  background: "/sounds/background.mp3",
 };
-

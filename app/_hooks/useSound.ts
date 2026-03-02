@@ -12,7 +12,7 @@ export function useSound(options: UseSoundOptions = {}) {
   const audioCache = useRef<Map<SoundType, HTMLAudioElement>>(new Map());
 
   const playSound = useCallback(
-    (soundType: SoundType) => {
+    (soundType: SoundType, options?: { loop?: boolean; restart?: boolean }) => {
       try {
         let audio = audioCache.current.get(soundType);
 
@@ -21,17 +21,30 @@ export function useSound(options: UseSoundOptions = {}) {
           audio = new Audio(soundPath);
           audio.volume = volume;
           audio.preload = "auto";
+          if (options?.loop) {
+            audio.loop = true;
+          }
           audioCache.current.set(soundType, audio);
         }
 
-        audio.currentTime = 0;
+        // 이미 재생 중이고 restart 옵션이 없으면 리셋하지 않음
+        if (options?.restart || audio.paused) {
+          audio.currentTime = 0;
+        }
+        
         audio.volume = volume;
+        if (options?.loop !== undefined) {
+          audio.loop = options.loop;
+        }
 
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise.catch((error) => {
-            console.warn(`Failed to play sound ${soundType}:`, error);
-          });
+        // 이미 재생 중이면 play()를 호출하지 않음
+        if (audio.paused) {
+          const playPromise = audio.play();
+          if (playPromise !== undefined) {
+            playPromise.catch((error) => {
+              console.warn(`Failed to play sound ${soundType}:`, error);
+            });
+          }
         }
       } catch (error) {
         console.warn(`Error playing sound ${soundType}:`, error);
