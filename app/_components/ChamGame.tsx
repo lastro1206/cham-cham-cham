@@ -140,6 +140,8 @@ export default function ChamGame() {
 
   const handleInputModeSelect = useCallback((mode: InputMode) => {
     setInputMode(mode);
+    // 사용자 상호작용 시 BGM 시작 (브라우저 자동 재생 정책 대응)
+    playSound("background", { loop: true });
     if (mode === "click") {
       // 클릭 모드는 바로 idle로, 그 다음 자동으로 카운트다운 시작
       setGameState("idle");
@@ -148,7 +150,7 @@ export default function ChamGame() {
       setGameState("countdown");
       setCountdownNumber(3);
     }
-  }, []);
+  }, [playSound]);
 
   // 클릭 모드에서 idle 상태일 때 자동으로 카운트다운 시작
   useEffect(() => {
@@ -189,16 +191,12 @@ export default function ChamGame() {
     }
   }, [inputMode]);
 
-  // 백그라운드 음악만 재생 (컴포넌트 마운트 시 한 번만 시작하고 무한 반복)
+  // 컴포넌트 언마운트 시 백그라운드 음악 정지
   useEffect(() => {
-    // 컴포넌트가 마운트될 때 한 번만 재생 시작
-    playSound("background", { loop: true });
-
     return () => {
-      // 컴포넌트 언마운트 시 백그라운드 음악 정지
       stopSound("background");
     };
-  }, [playSound, stopSound]);
+  }, [stopSound]);
 
   const showStarBurst =
     (gameState === "result" && outcome === "win") ||

@@ -27,17 +27,17 @@ export function useSound(options: UseSoundOptions = {}) {
           audioCache.current.set(soundType, audio);
         }
 
-        // 이미 재생 중이고 restart 옵션이 없으면 리셋하지 않음
-        if (options?.restart || audio.paused) {
-          audio.currentTime = 0;
-        }
-        
         audio.volume = volume;
         if (options?.loop !== undefined) {
           audio.loop = options.loop;
         }
 
-        // 이미 재생 중이면 play()를 호출하지 않음
+        // restart 옵션이 있으면 처음부터 재생, 없으면 현재 위치에서 계속 재생
+        if (options?.restart) {
+          audio.currentTime = 0;
+        }
+
+        // 재생 중이 아니면 재생 시작
         if (audio.paused) {
           const playPromise = audio.play();
           if (playPromise !== undefined) {
